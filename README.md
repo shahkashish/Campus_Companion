@@ -1,3 +1,5 @@
+#### Hosting Static Website on EC2 using Docker
+
 Deploying multiple static websites on EC2 instances using Docker involves several steps, from setting up your EC2 instance to configuring Docker containers for each website. Below, I outline a comprehensive approach to achieve this, assuming you have basic familiarity with AWS EC2, Docker, and static website structures.
 
 ### Step 1: Set Up Your EC2 Instance
