@@ -1,4 +1,4 @@
-# Hosting Multiple Static Website on EC2 using Docker
+# Hosting Multiple Static Websites on EC2 using Docker
 
 Certainly! Let's delve into a more detailed explanation, focusing on deploying multiple static websites using Docker on an Amazon EC2 instance. This walkthrough will cover setting up your EC2 instance, installing Docker, pulling an Nginx image (a popular choice for serving static websites), creating Dockerfiles for your static sites, building and running your Docker containers, and finally, accessing your sites.
 
