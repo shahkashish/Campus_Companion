@@ -49,7 +49,7 @@ Certainly! Let's delve into a more detailed explanation, focusing on deploying m
 
 2. **Create a Dockerfile**: Inside each directory, create a `Dockerfile` that specifies how to build the container. Here's an example for a static site:
 
-   "`Dockerfile
+   ```Dockerfile
    # Use the Nginx image from Docker Hub
    FROM nginx:alpine
 
@@ -63,9 +63,9 @@ Certainly! Let's delve into a more detailed explanation, focusing on deploying m
    COPY . /usr/share/nginx/html
    ```
 
-   - **Note**: You'll need an `nginx.conf` file in your website directory that configures Nginx to serve your site. Here's a simple example of what `nginx.conf` might look like:
+   - **Note**: You'll need an `nginx.conf` file in your website directory that configures Nginx to serve your site. Here’s a simple example of what `nginx.conf` might look like:
 
-     "`nginx
+     ```nginx
      server {
          listen 80;
          location / {
