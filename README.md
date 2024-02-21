@@ -1,77 +1,102 @@
 # Hosting Multiple Static Website on EC2 using Docker
 
-Deploying multiple static websites on EC2 instances using Docker involves several steps, from setting up your EC2 instance to configuring Docker containers for each website. Below, I outline a comprehensive approach to achieve this, assuming you have basic familiarity with AWS EC2, Docker, and static website structures.
+Certainly! Let's delve into a more detailed explanation, focusing on deploying multiple static websites using Docker on an Amazon EC2 instance. This walkthrough will cover setting up your EC2 instance, installing Docker, pulling an Nginx image (a popular choice for serving static websites), creating Dockerfiles for your static sites, building and running your Docker containers, and finally, accessing your sites.
 
-### Step 1: Set Up Your EC2 Instance
+### Prerequisites
 
-1. **Launch an EC2 Instance**:
-   - Log in to your AWS Management Console.
-   - Navigate to the EC2 dashboard and click "Launch Instance".
-   - Choose an Amazon Machine Image (AMI), preferably Amazon Linux 2 or Ubuntu, as they come with Docker available.
-   - Select an instance type, then click "Review and Launch".
+- An AWS account.
+- An EC2 instance running (Amazon Linux, Ubuntu, etc.).
+- SSH access to your EC2 instance.
 
-2. **Configure Security Group**:
-   - Add rules to allow inbound traffic on HTTP (port 80) and SSH (port 22).
+### Step 1: Setting Up Your EC2 Instance
 
-3. **Launch the Instance**:
-   - Review your settings and click "Launch".
-   - Select a key pair or create a new one, then launch your instance.
+- **Launch an EC2 Instance**: Choose an Amazon Linux 2 AMI or Ubuntu AMI for simplicity. Ensure the instance type matches your expected traffic load.
+- **Security Group Configuration**: Allow inbound traffic on port 80 (HTTP) and 22 (SSH). You might also want to open additional ports if you plan to serve websites on different ports.
 
-### Step 2: Install Docker on EC2
+### Step 2: Installing Docker on EC2
 
-1. **Connect to Your EC2 Instance**:
-   - Use SSH to connect to your instance. Replace `your-public-dns` with your instance's public DNS:
-     ```bash
-     ssh -i /path/to/your-key.pem ec2-user@your-public-dns
-     ```
-
+1. **SSH into Your EC2 Instance**:
+   ```
+   ssh -i /path/to/your-key.pem ec2-user@your-public-dns
+   ```
 2. **Install Docker**:
-   - Update your package repository (specific commands may vary based on the OS).
-   - Install Docker using the package manager:
-     ```bash
-     sudo yum update -y # For Amazon Linux 2
-     sudo yum install docker -y
+   - **For Amazon Linux 2**:
      ```
-   - Start the Docker service:
-     ```bash
+     sudo yum update -y
+     sudo amazon-linux-extras install docker
      sudo service docker start
+     sudo usermod -a -G docker ec2-user
      ```
-   - Add your user to the Docker group to run Docker commands without sudo (optional):
-     ```bash
-     sudo usermod -a -G docker $USER
+   - **For Ubuntu**:
+     ```
+     sudo apt-get update
+     sudo apt-get install docker.io
+     sudo systemctl start docker
+     sudo systemctl enable docker
+     sudo usermod -aG docker ${USER}
      ```
 
-### Step 3: Deploy Static Websites with Docker
+### Step 3: Pulling the Nginx Image
 
-1. **Create Dockerfile for Each Website**:
-   - For each static website, create a directory with its content and a Dockerfile.
-   - Example `Dockerfile` for a static website:
-     ```Dockerfile
-     FROM nginx:alpine
-     COPY . /usr/share/nginx/html
+- **Pull the Nginx Image** from Docker Hub:
+  ```
+  docker pull nginx:latest
+  ```
+
+### Step 4: Preparing Your Static Websites
+
+1. **Create a Directory for Each Website**: For each static website, create a separate directory. Place your website files (HTML, CSS, JS, etc.) in their respective directories.
+
+2. **Create a Dockerfile**: Inside each directory, create a `Dockerfile` that specifies how to build the container. Here's an example for a static site:
+
+   "`Dockerfile
+   # Use the Nginx image from Docker Hub
+   FROM nginx:alpine
+
+   # Remove the default Nginx configuration file
+   RUN rm /etc/nginx/conf.d/default.conf
+
+   # Copy a custom configuration file from the host to the container
+   COPY nginx.conf /etc/nginx/conf.d
+
+   # Copy the static site files to the Nginx server
+   COPY . /usr/share/nginx/html
+   ```
+
+   - **Note**: You'll need an `nginx.conf` file in your website directory that configures Nginx to serve your site. Here's a simple example of what `nginx.conf` might look like:
+
+     "`nginx
+     server {
+         listen 80;
+         location / {
+             root   /usr/share/nginx/html;
+             index  index.html index.htm;
+         }
+     }
      ```
-   - This uses the `nginx:alpine` image and copies the static site content into the Nginx web server directory.
 
-2. **Build Docker Images**:
-   - Navigate to each website directory and build the Docker image:
-     ```bash
-     docker build -t website1:latest .
-     ```
-   - Repeat for each website, changing the tag accordingly (e.g., `website2:latest`).
+### Step 5: Building and Running Your Docker Containers
 
-3. **Run Containers**:
-   - Run each Docker container on a different port:
-     ```bash
-     docker run -d -p 8080:80 website1:latest
-     docker run -d -p 8081:80 website2:latest
-     ```
-   - These commands run the containers in detached mode, mapping port 80 inside the container to ports 8080 and 8081 on the host.
+1. **Build the Docker Image** for each site from its respective directory:
+   ```
+   docker build -t website1:latest .
+   ```
 
-### Step 4: Access Your Websites
+2. **Run the Docker Container** for each site on a unique port:
+   ```
+   docker run -d -p 8080:80 website1:latest
+   docker run -d -p 8081:80 website2:latest
+   ```
 
-- Now, you can access your static websites using the EC2 instance's public IP or DNS:
-  - Website 1: `http://your-ec2-public-dns:8080`
-  - Website 2: `http://your-ec2-public-dns:8081`
+### Step 6: Accessing Your Static Websites
 
+- After the containers are running, you can access your websites using the EC2 instance's public IP address or DNS name followed by the port number:
+  - `http://your-ec2-public-dns:8080`
+  - `http://your-ec2-public-dns:8081`
 
-This approach provides a scalable and flexible way to host multiple static websites using Docker on AWS EC2, with each site isolated in its container and accessible via different ports.
+### Additional Notes
+
+- **Custom Domain**: If you want to use custom domain names for your static sites, you'll need to configure DNS settings (like A records) to point to your EC2 instance's IP address. You might also need to set up reverse proxy settings in Nginx to serve multiple domains from the same server.
+- **HTTPS**: For secure connections, consider setting up SSL/TLS certificates using Let's Encrypt and adjusting your Nginx configuration to serve content over HTTPS.
+
+This guide offers a comprehensive overview for deploying static sites with Docker on an EC2 instance. Each step, from installing Docker to accessing your deployed sites, is crucial for a successful deployment. Remember, managing production environments requires attention to security, scalability, and ongoing maintenance.
