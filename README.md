@@ -73,11 +73,5 @@ Deploying multiple static websites on EC2 instances using Docker involves severa
   - Website 1: `http://your-ec2-public-dns:8080`
   - Website 2: `http://your-ec2-public-dns:8081`
 
-### Screenshots & Documentation
-
-- For the purposes of this guide, screenshots cannot be directly provided. However, to document your process for personal or team use:
-  1. **Take Screenshots**: As you complete each major step (e.g., setting up the EC2 instance, installing Docker, running containers), take screenshots.
-  2. **Document Steps**: Create a document in your preferred format (e.g., Markdown, Google Docs) and describe each step, embedding or linking to the corresponding screenshots.
-  3. **Share Your Documentation**: Ensure your documentation is accessible to your team or stored securely for personal reference.
 
 This approach provides a scalable and flexible way to host multiple static websites using Docker on AWS EC2, with each site isolated in its container and accessible via different ports.
